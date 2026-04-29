@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Handler {
-    private final Scanner in = new Scanner(System.in);
-    private final PhoneList phoneList = new PhoneList();
-    private final AIService aiService;
+    private final Scanner in;
+    private final PhoneAppService phoneAppService;
 
-    public Handler(AIService aiService) {
-        this.aiService = aiService;
+    public Handler(Scanner in, PhoneAppService phoneAppService) {
+        this.in = in;
+        this.phoneAppService = phoneAppService;
     }
 
     public void printChoices(){
@@ -26,9 +26,11 @@ public class Handler {
         System.out.println("\n1. Search by model");
         System.out.println("2. Search by price range");
         System.out.print("Choice: ");
-        int choice = in.nextInt();
-        in.nextLine();
-        in.nextLine();
+        Integer choice = readIntLine();
+        if (choice == null) {
+            System.out.println("Invalid option.");
+            return;
+        }
         if (choice == 1) {
             System.out.println("======== Search for Phone By Model ========");
             searchByModel();
@@ -45,18 +47,21 @@ public class Handler {
         System.out.print("Please enter the Model Name (Ex: iPhone 15 Pro) \nModel name: ");
         String model = in.nextLine().trim();
         System.out.print("Please enter phone storage (EX: 15)\nStorage (GB): ");
-        int storage = in.nextInt();
-        in.nextLine();
+        Integer storage = readIntLine();
+        if (storage == null) {
+            System.out.println("Storage must be a whole number.");
+            return;
+        }
         System.out.print("Describe any damage (or \"none\"): ");
         String damage = in.nextLine().trim();
-        Phone phone = new Phone(model, storage, damage, 0.0);
-        String result = aiService.evaluate(phone); 
-        System.out.println("\nEvaluation: " + result);
+        PhoneEvaluationResponse response = phoneAppService.evaluatePhone(model, storage, damage);
+        Phone phone = response.getPhone();
+        EvaluationResult result = response.getEvaluationResult();
+        System.out.println("\nAI source: " + result.getSourceLabel());
+        System.out.println("Used external AI: " + (result.usedExternalAI() ? "Yes" : "No"));
+        System.out.println("Evaluation: " + result.getExplanation());
         System.out.printf("Estimated price: $%.2f%n", phone.getEstimatedPrice());
-
-        phoneList.addPhone(phone);
         System.out.println("Phone added to the database.");
-        in.nextLine();
         System.out.println("Press Enter to Return to Main Menu");
         in.nextLine();
     }
@@ -64,25 +69,31 @@ public class Handler {
     private void searchByModel() {
         System.out.print("Please enter the Model Name (EX: 'iPhone' or 'iPhone 15 Pro')\nModel to search: ");
         String model = in.nextLine().trim();
-        printResults(phoneList.searchByModel(model));
+        printResults(phoneAppService.searchByModel(model));
         System.out.println("Press Enter to Return to Main Menu");
         in.nextLine();
     }
 
     private void searchByPrice() {
         System.out.print("Please enter the minimum price (EX: 100.00 or 100)\nMin price ($): ");
-        double min = in.nextDouble();
-        in.nextLine();
+        Double min = readDoubleLine();
+        if (min == null) {
+            System.out.println("Minimum price must be a number.");
+            return;
+        }
         System.out.print("Please enter the maximum price (EX: 100.00 or 100)\nMax price ($): ");
-        double max = in.nextDouble();
-        in.nextLine();
-        printResults(phoneList.searchByPrice(min, max));
+        Double max = readDoubleLine();
+        if (max == null) {
+            System.out.println("Maximum price must be a number.");
+            return;
+        }
+        printResults(phoneAppService.searchByPrice(min, max));
         System.out.println("Press Enter to Return to Main Menu");
         in.nextLine();
     }
 
     public void viewAll() {
-        printResults(phoneList.getAllPhones());
+        printResults(phoneAppService.getAllPhones());
         System.out.println("Press Enter to Return to Main Menu");
         in.nextLine();
     }
@@ -96,6 +107,30 @@ public class Handler {
         System.out.printf("%n%-25s %-13s %-35s %s%n", "Phone Model", "Storage (GB)", "Condition", "Estimated Price");
         for (int i = 0; i < results.size(); i++) {
             System.out.println(results.get(i));
+        }
+    }
+
+    private Integer readIntLine() {
+        String input = in.nextLine().trim();
+        if (input.isEmpty()) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Double readDoubleLine() {
+        String input = in.nextLine().trim();
+        if (input.isEmpty()) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(input);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

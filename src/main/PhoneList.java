@@ -6,8 +6,6 @@ import java.util.List;
 public class PhoneList {
     private final List<Phone> phones = new ArrayList<>();
 
-    public PhoneList() {}
-
     public void addPhone(Phone phone) {
         phones.add(phone);
     }
