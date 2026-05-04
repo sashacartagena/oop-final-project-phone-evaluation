@@ -10,8 +10,24 @@
 
 | | |
 |---|---|
-| **Overview** | The user selects to search for a phone and chooses to search either by model name or by price range. If searching by model, the user enters a phone model name. If searching by price, the user enters a minimum and maximum price. The system shows matching results from the phone list. |
+| **Overview** | The user selects to search for a phone and chooses to search either by model name or by price range.  |
 | **Related Use Cases** | Generalization: Search by model, Search by price |
+| **Actors** | Phone Evaluation User, Phone Evaluation System |
+
+## UC-02a: Search by Model
+
+| | |
+|---|---|
+| **Overview** | Specialized search where the user inputs a phone model name and the system displays matching results from the phone list. |
+| **Related Use Cases** | Parent: UC-02 Search for Phone |
+| **Actors** | Phone Evaluation User, Phone Evaluation System |
+
+## UC-02b: Search by Price
+
+| | |
+|---|---|
+| **Overview** | Specialized search where the user enters a minimum and maximum price range and the system displays matching results from the phone list. |
+| **Related Use Cases** | Parent: UC-02 Search for Phone |
 | **Actors** | Phone Evaluation User, Phone Evaluation System |
 
 ## UC-03: Browse All Phones
